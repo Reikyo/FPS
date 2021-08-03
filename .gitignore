@@ -1,0 +1,58 @@
+Binaries/*
+Build/*
+Content/AnimStarterPack/*
+Content/FirstPerson/*
+Content/FirstPersonCPP/*
+Content/Geometry/*
+Content/StarterContent/*
+DerivedDataCache/*
+Intermediate/*
+Saved/*
+
+.DS_Store
+*.opendb
+*.opensdf
+*.sdf
+*.sln
+*.suo
+
+# Visual Studio
+.vs
+.vscode
+*.code-workspace
+*.VC.db
+*.VC.opendb
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+
+# Executables
+*.app
+*.exe
+*.ipa
+*.out
+
+# Fortran module files
+*.mod
+
+# Compiled object files
+*.lo
+*.o
+*.obj
+*.slo
+
+# Compiled headers
+*.gch
+*.pch
+
+# Compiled static libraries
+*.a
+*.la
+*.lai
+*.lib
+
+# Compiled dynamic libraries
+*.dll
+*.dylib
+*.so
