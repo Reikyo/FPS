@@ -34,14 +34,14 @@ AFP_FirstPersonCharacter::AFP_FirstPersonCharacter()
 
 	skmeshPlayerWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skmeshPlayerWeapon"));
 	skmeshPlayerWeapon->SetOnlyOwnerSee(true);
+	skmeshPlayerWeapon->SetupAttachment(skmeshPlayerArms, TEXT("GripPoint"));
 	skmeshPlayerWeapon->bCastDynamicShadow = false;
 	skmeshPlayerWeapon->CastShadow = false;
-	skmeshPlayerWeapon->SetupAttachment(skmeshPlayerArms, TEXT("GripPoint"));
 
 	fDegPerSecMaxLookHorizontal = 45.f;
 	fDegPerSecMaxLookVertical = 45.f;
 
-	v3OffsetWeapon = FVector(100.f, 30.f, 10.f);
+	v3PosOffsetWeapon = FVector(100.f, 30.f, 10.f);
 	fRangeWeapon = 5000.f;
 	fDamageWeapon = 5000.f;
 }
@@ -123,35 +123,34 @@ void AFP_FirstPersonCharacter::FireWeapon()
 
 	APlayerController* playerController = Cast<APlayerController>(GetController());
 	FVector v3DirWeapon = FVector::ZeroVector;
-	FVector v3RayStart = FVector::ZeroVector;
+	FVector v3PosRayStart = FVector::ZeroVector;
 
 	if (playerController)
 	{
 		FRotator rotCamera;
-		playerController->GetPlayerViewPoint(v3RayStart, rotCamera);
+		playerController->GetPlayerViewPoint(v3PosRayStart, rotCamera);
 		v3DirWeapon = rotCamera.Vector();
-		v3RayStart = v3RayStart + v3DirWeapon * ((GetActorLocation() - v3RayStart) | v3DirWeapon);
+		v3PosRayStart = v3PosRayStart + v3DirWeapon * ((GetActorLocation() - v3PosRayStart) | v3DirWeapon);
 	}
 
-	const FVector v3RayEnd = v3RayStart + (fRangeWeapon * v3DirWeapon);
+	const FVector v3PosRayEnd = v3PosRayStart + (fRangeWeapon * v3DirWeapon);
 
-	const FHitResult hit = RaycastWeapon(v3RayStart, v3RayEnd);
-
+	const FHitResult hit = GetHitRay(v3PosRayStart, v3PosRayEnd);
 	AActor* actorHit = hit.GetActor();
-	UPrimitiveComponent* primitiveHit = hit.GetComponent();
+	UPrimitiveComponent* componentHit = hit.GetComponent();
 
 	if (	(actorHit != nullptr)
 		&&	(actorHit != this)
-		&&	(primitiveHit != nullptr)
-		&&	(primitiveHit->IsSimulatingPhysics()) )
+		&&	(componentHit != nullptr)
+		&&	(componentHit->IsSimulatingPhysics()) )
 	{
-		primitiveHit->AddImpulseAtLocation(fDamageWeapon * v3DirWeapon, hit.Location);
+		componentHit->AddImpulseAtLocation(fDamageWeapon * v3DirWeapon, hit.Location);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 
-FHitResult AFP_FirstPersonCharacter::RaycastWeapon(const FVector& v3RayStart, const FVector& v3RayEnd) const
+FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const
 {
 	FHitResult hit(ForceInit);
 	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(RaycastWeapon), true, GetInstigator());
@@ -159,8 +158,8 @@ FHitResult AFP_FirstPersonCharacter::RaycastWeapon(const FVector& v3RayStart, co
 
 	GetWorld()->LineTraceSingleByChannel(
 		hit,
-		v3RayStart,
-		v3RayEnd,
+		v3PosRayStart,
+		v3PosRayEnd,
 		COLLISION_WEAPON,
 		paramsRay
 	);

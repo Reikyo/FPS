@@ -38,7 +38,7 @@ public:
 	float fDegPerSecMaxLookVertical;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
-	FVector v3OffsetWeapon;
+	FVector v3PosOffsetWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 	float fRangeWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
@@ -60,7 +60,7 @@ protected:
 	void LookVertical(float fFractionDegPerSecMax);
 
 	void FireWeapon();
-	FHitResult RaycastWeapon(const FVector& v3RayStart, const FVector& v3RayEnd) const;
+	FHitResult GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const;
 
 // ------------------------------------------------------------------------------------------------
 
