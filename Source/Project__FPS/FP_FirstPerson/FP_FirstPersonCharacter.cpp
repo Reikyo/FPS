@@ -70,6 +70,7 @@ void AFP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	inputPlayer->BindAction("FireWeapon", IE_Pressed, this, &AFP_FirstPersonCharacter::FireWeapon);
 
 	inputPlayer->BindAction("TestRaycast", IE_Pressed, this, &AFP_FirstPersonCharacter::TestRaycast);
+	inputPlayer->BindAction("TestRaycastShape", IE_Pressed, this, &AFP_FirstPersonCharacter::TestRaycastShape);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -126,19 +127,19 @@ void AFP_FirstPersonCharacter::FireWeapon()
 
 	APlayerController* playerController = Cast<APlayerController>(GetController());
 	FVector v3DirWeapon = FVector::ZeroVector;
-	FVector v3PosRayStart = FVector::ZeroVector;
+	FVector v3PosStartRay = FVector::ZeroVector;
 
 	if (playerController)
 	{
 		FRotator rotCamera;
-		playerController->GetPlayerViewPoint(v3PosRayStart, rotCamera);
+		playerController->GetPlayerViewPoint(v3PosStartRay, rotCamera);
 		v3DirWeapon = rotCamera.Vector();
-		v3PosRayStart = v3PosRayStart + v3DirWeapon * ((GetActorLocation() - v3PosRayStart) | v3DirWeapon);
+		v3PosStartRay = v3PosStartRay + v3DirWeapon * ((GetActorLocation() - v3PosStartRay) | v3DirWeapon);
 	}
 
-	const FVector v3PosRayEnd = v3PosRayStart + (fRangeWeapon * v3DirWeapon);
+	const FVector v3PosEndRay = v3PosStartRay + (fRangeWeapon * v3DirWeapon);
 
-	const FHitResult hit = GetHitRay(v3PosRayStart, v3PosRayEnd);
+	const FHitResult hit = GetHitRay(v3PosStartRay, v3PosEndRay);
 	AActor* actorHit = hit.GetActor();
 	UPrimitiveComponent* componentHit = hit.GetComponent();
 
@@ -153,18 +154,18 @@ void AFP_FirstPersonCharacter::FireWeapon()
 
 // ------------------------------------------------------------------------------------------------
 
-FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const
+FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosStartRay, const FVector& v3PosEndRay) const
 {
 	FHitResult hit(ForceInit);
-	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(GetHitRay), true, GetInstigator());
-	paramsRay.bReturnPhysicalMaterial = true;
+	FCollisionQueryParams params(SCENE_QUERY_STAT(GetHitRay), true, GetInstigator());
+	params.bReturnPhysicalMaterial = true;
 
 	GetWorld()->LineTraceSingleByChannel(
 		hit,
-		v3PosRayStart,
-		v3PosRayEnd,
+		v3PosStartRay,
+		v3PosEndRay,
 		COLLISION_WEAPON,
-		paramsRay
+		params
 	);
 
 	return hit;
@@ -175,55 +176,140 @@ FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosRayStart, con
 void AFP_FirstPersonCharacter::TestRaycast()
 {
 	// https://www.orfeasel.com/single-line-raycasting
-	// Single Line Raycasting
+	// Single line raycasting
 	// Orfeas Eleftheriou
 	// 2015/12/23
 
-	float fLengthRay = 5000.f;
 	FHitResult hit;
-    FVector v3PosRayStart = camFirstPerson->GetComponentLocation();
-    FVector v3PosRayEnd = v3PosRayStart + (fLengthRay * camFirstPerson->GetForwardVector());
-	// FCollisionQueryParams paramsRay; // This version was from the original blog author, which includes the player in the hit possibilities
-	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(TestRaycast), true, GetInstigator()); // This version was taken from the FPS template, and discludes the player in the hit possibilities
+	FCollisionQueryParams params(SCENE_QUERY_STAT(TestRaycast), true, GetInstigator()); // This version was taken from the FPS template, and discludes the player in the hit possibilities
+	// FCollisionQueryParams params; // This version was from the original blog author, which includes the player in the hit possibilities
+
+	float fLengthRay = 500.f;
+    FVector v3PosStartRay = camFirstPerson->GetComponentLocation();
+    FVector v3PosEndRay = v3PosStartRay + (fLengthRay * camFirstPerson->GetForwardVector());
 
 	// This version was from the original blog author:
     // ActorLineTraceSingle(
 	// 	hit,
-	// 	v3PosRayStart,
-	// 	v3PosRayEnd,
+	// 	v3PosStartRay,
+	// 	v3PosEndRay,
 	// 	ECollisionChannel::ECC_WorldDynamic,
-	// 	paramsRay
+	// 	params
 	// );
 
 	// This version was from a comment in the blog, as the author's version has issues with self hits,
 	// even with the adjusted FCollisionQueryParams. This version is also more similar to the Unreal
 	// FPS demo code:
-	GetWorld()->LineTraceSingleByChannel(
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		hit,
-		v3PosRayStart,
-		v3PosRayEnd,
+		v3PosStartRay,
+		v3PosEndRay,
 		// ECollisionChannel::ECC_WorldStatic,
 		ECollisionChannel::ECC_WorldDynamic,
-		paramsRay
+		params
 	);
 
-    DrawDebugLine(
-		GetWorld(),
-		v3PosRayStart,
-		v3PosRayEnd,
-		FColor::Green,
-		true, // Line persistence
-		-1,
-		0,
-		1.f // Line width
-	);
-
+	UE_LOG(LogTemp, Warning, TEXT("----- TestRaycast --------------------------------"));
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.ToString());
 	if (hit.IsValidBlockingHit())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.GetActor()->GetName());
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.GetComponent()->GetName());
 	}
+
+    DrawDebugLine(
+		GetWorld(),
+		v3PosStartRay,
+		v3PosEndRay,
+		FColor::Green,
+		true, // Line persistence
+		-1,
+		0,
+		1.f // Line width
+	);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+void AFP_FirstPersonCharacter::TestRaycastShape()
+{
+	// https://www.orfeasel.com/tracing-multiple-objects
+	// Tracing multiple objects
+	// Orfeas Eleftheriou
+	// 2015/12/24
+
+    TArray<FHitResult> hitArr;
+	FCollisionQueryParams params(SCENE_QUERY_STAT(TestRaycastShape), true, GetInstigator());
+
+	float fPosDeltaMagSphere = 500.f;
+	float fRadiusSphere = 100.f;
+	int iNumSegmentSphere = 32;
+    // FVector v3PosStartSphere = GetActorLocation();
+	FVector v3PosStartSphere = camFirstPerson->GetComponentLocation();
+    FVector v3PosEndSphere = v3PosStartSphere + (fPosDeltaMagSphere * camFirstPerson->GetForwardVector());
+	FQuat quatSphere = FQuat();
+
+    FCollisionShape collisionShape;
+    collisionShape.ShapeType = ECollisionShape::Sphere;
+    collisionShape.SetSphere(fRadiusSphere);
+	// UE_LOG(LogTemp, Warning, TEXT("%f"), collisionShape.GetSphereRadius());
+
+	// This returns all initial objects that overlap with the shape in its starting position, plus the
+	// first object that interacts with the shape as it moves to its end position is the final entry in
+	// the array. Took me a while to get my head around what's going on, but hopefully this description
+	// is relatively clear on re-reading.
+    bool bHit = GetWorld()->SweepMultiByChannel(
+		hitArr,
+		v3PosStartSphere,
+		v3PosEndSphere,
+		quatSphere,
+		// ECollisionChannel::ECC_WorldStatic,
+		ECollisionChannel::ECC_WorldDynamic,
+		collisionShape,
+		params
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("----- TestRaycastShape ---------------------------"));
+	if (!bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No hit"));
+	}
+	else
+	{
+		for (auto hit = hitArr.CreateIterator(); hit; hit++)
+	    {
+	        // GLog->Log((*hit).Actor->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *hit->ToString());
+			if (hit->IsValidBlockingHit())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *hit->GetActor()->GetName());
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *hit->GetComponent()->GetName());
+			}
+			UE_LOG(LogTemp, Warning, TEXT("--------------------------------------------------"));
+			// These three lines are all equivalent:
+			// UE_LOG(LogTemp, Warning, TEXT("%s"), *(*hit).Actor->GetName());
+			// UE_LOG(LogTemp, Warning, TEXT("%s"), *hit->Actor->GetName());
+			// UE_LOG(LogTemp, Warning, TEXT("%s"), *hit->GetActor()->GetName());
+	    }
+	}
+
+    DrawDebugSphere(
+		GetWorld(),
+		v3PosStartSphere,
+		fRadiusSphere,
+		iNumSegmentSphere,
+		FColor::Green,
+		true
+	);
+
+	DrawDebugSphere(
+		GetWorld(),
+		v3PosEndSphere,
+		fRadiusSphere,
+		iNumSegmentSphere,
+		FColor::Blue,
+		true
+	);
 }
 
 // ------------------------------------------------------------------------------------------------

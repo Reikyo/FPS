@@ -60,9 +60,10 @@ protected:
 	void LookVertical(float fFractionDegPerSecMax);
 
 	void FireWeapon();
-	FHitResult GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const;
+	FHitResult GetHitRay(const FVector& v3PosStartRay, const FVector& v3PosEndRay) const;
 
 	void TestRaycast();
+	void TestRaycastShape();
 
 // ------------------------------------------------------------------------------------------------
 
