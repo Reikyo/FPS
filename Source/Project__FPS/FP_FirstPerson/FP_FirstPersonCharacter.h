@@ -62,6 +62,8 @@ protected:
 	void FireWeapon();
 	FHitResult GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const;
 
+	void TestRaycast();
+
 // ------------------------------------------------------------------------------------------------
 
 public:

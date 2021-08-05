@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include <stdlib.h>
@@ -67,6 +68,8 @@ void AFP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	inputPlayer->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	inputPlayer->BindAction("FireWeapon", IE_Pressed, this, &AFP_FirstPersonCharacter::FireWeapon);
+
+	inputPlayer->BindAction("TestRaycast", IE_Pressed, this, &AFP_FirstPersonCharacter::TestRaycast);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -153,7 +156,7 @@ void AFP_FirstPersonCharacter::FireWeapon()
 FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosRayStart, const FVector& v3PosRayEnd) const
 {
 	FHitResult hit(ForceInit);
-	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(RaycastWeapon), true, GetInstigator());
+	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(GetHitRay), true, GetInstigator());
 	paramsRay.bReturnPhysicalMaterial = true;
 
 	GetWorld()->LineTraceSingleByChannel(
@@ -165,6 +168,62 @@ FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosRayStart, con
 	);
 
 	return hit;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+void AFP_FirstPersonCharacter::TestRaycast()
+{
+	// https://www.orfeasel.com/single-line-raycasting
+	// Single Line Raycasting
+	// Orfeas Eleftheriou
+	// 2015/12/23
+
+	float fLengthRay = 5000.f;
+	FHitResult hit;
+    FVector v3PosRayStart = camFirstPerson->GetComponentLocation();
+    FVector v3PosRayEnd = v3PosRayStart + (fLengthRay * camFirstPerson->GetForwardVector());
+	// FCollisionQueryParams paramsRay; // This version was from the original blog author, which includes the player in the hit possibilities
+	FCollisionQueryParams paramsRay(SCENE_QUERY_STAT(TestRaycast), true, GetInstigator()); // This version was taken from the FPS template, and discludes the player in the hit possibilities
+
+	// This version was from the original blog author:
+    // ActorLineTraceSingle(
+	// 	hit,
+	// 	v3PosRayStart,
+	// 	v3PosRayEnd,
+	// 	ECollisionChannel::ECC_WorldDynamic,
+	// 	paramsRay
+	// );
+
+	// This version was from a comment in the blog, as the author's version has issues with self hits,
+	// even with the adjusted FCollisionQueryParams. This version is also more similar to the Unreal
+	// FPS demo code:
+	GetWorld()->LineTraceSingleByChannel(
+		hit,
+		v3PosRayStart,
+		v3PosRayEnd,
+		// ECollisionChannel::ECC_WorldStatic,
+		ECollisionChannel::ECC_WorldDynamic,
+		paramsRay
+	);
+
+    DrawDebugLine(
+		GetWorld(),
+		v3PosRayStart,
+		v3PosRayEnd,
+		FColor::Green,
+		true, // Line persistence
+		-1,
+		0,
+		1.f // Line width
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.ToString());
+	if (hit.IsValidBlockingHit())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.GetActor()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *hit.GetComponent()->GetName());
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
