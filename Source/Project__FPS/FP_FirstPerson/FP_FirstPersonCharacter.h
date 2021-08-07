@@ -72,6 +72,11 @@ public:
 	FORCEINLINE class UCameraComponent* Get_camFirstPerson() const { return camFirstPerson; }
 	FORCEINLINE class USkeletalMeshComponent* Get_skmeshPlayerArms() const { return skmeshPlayerArms; }
 
+	UFUNCTION(BlueprintCallable, Category="TEST")
+	void TestBlueprintCallable(int32 iMyInt);
+	UFUNCTION(BlueprintImplementableEvent, Category="TEST")
+	void TestBlueprintImplementableEvent(int32 iMyInt);
+
 // ------------------------------------------------------------------------------------------------
 
 };
