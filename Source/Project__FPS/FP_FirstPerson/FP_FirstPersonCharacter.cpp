@@ -164,7 +164,7 @@ FHitResult AFP_FirstPersonCharacter::GetHitRay(const FVector& v3PosStartRay, con
 		hit,
 		v3PosStartRay,
 		v3PosEndRay,
-		COLLISION_WEAPON,
+		COLLISION_WEAPON, // This is defined at the top of this file!
 		params
 	);
 
