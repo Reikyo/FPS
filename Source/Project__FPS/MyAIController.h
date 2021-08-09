@@ -18,6 +18,7 @@ public:
 	AMyAIController();
 	FORCEINLINE UBlackboardComponent* GetBlackboard() const { return blackboard; }
 	FORCEINLINE TArray<AActor*> GetTargetPoints() { return myAITargetPointArr; }
+	void SetSeenTarget(APawn* pawn);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -27,6 +28,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName keyPositionToGo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName keyTarget;
 
 	TArray<AActor*> myAITargetPointArr;
 

@@ -15,6 +15,7 @@ AMyAIController::AMyAIController()
     behaviorTree = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("behaviorTree"));
     blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("blackboard"));
     keyPositionToGo = "PositionToGo";
+    keyTarget = "Target";
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -35,6 +36,16 @@ void AMyAIController::OnPossess(APawn* pawn)
         }
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyAITargetPoint::StaticClass(), myAITargetPointArr);
         behaviorTree->StartTree(*myAICharacter->behaviorTree);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+void AMyAIController::SetSeenTarget(APawn* pawn)
+{
+    if (blackboard)
+    {
+        blackboard->SetValueAsObject(keyTarget, pawn);
     }
 }
 

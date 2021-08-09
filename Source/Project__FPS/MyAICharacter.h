@@ -14,10 +14,19 @@ class PROJECT__FPS_API AMyAICharacter : public ACharacter
 // ------------------------------------------------------------------------------------------------
 
 public:
-	// AMyAICharacter();
+	AMyAICharacter();
+
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category="AI")
 	class UBehaviorTree* behaviorTree;
+
+	UPROPERTY(VisibleAnywhere, Category="AI")
+	class UPawnSensingComponent* pawnSensingComp;
+
+private:
+	UFUNCTION()
+	void OnSeePlayer(APawn* pawn);
 
 // ------------------------------------------------------------------------------------------------
 
