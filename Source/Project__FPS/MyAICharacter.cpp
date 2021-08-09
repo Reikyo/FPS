@@ -31,6 +31,11 @@ void AMyAICharacter::BeginPlay()
 // void AMyAICharacter::Tick(float DeltaTime)
 // {
 // 	Super::Tick(DeltaTime);
+//
+// 	if (pawnSensingComp)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("%i"), pawnSensingComp->HasLineOfSightTo(GetWorld()->GetFirstPlayerController()->GetPawn()));
+// 	}
 // }
 
 // ------------------------------------------------------------------------------------------------

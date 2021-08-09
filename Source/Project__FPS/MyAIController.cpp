@@ -15,7 +15,7 @@ AMyAIController::AMyAIController()
     behaviorTree = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("behaviorTree"));
     blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("blackboard"));
     keyPositionToGo = "PositionToGo";
-    keyTarget = "Target";
+    // keyTarget = "Target";
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ void AMyAIController::SetSeenTarget(APawn* pawn)
 {
     if (blackboard)
     {
-        blackboard->SetValueAsObject(keyTarget, pawn);
+        blackboard->SetValueAsObject(keyPositionToGo, pawn);
     }
 }
 

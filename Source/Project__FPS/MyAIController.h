@@ -20,17 +20,17 @@ public:
 	FORCEINLINE TArray<AActor*> GetTargetPoints() { return myAITargetPointArr; }
 	void SetSeenTarget(APawn* pawn);
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName keyPositionToGo;
+
+	// UPROPERTY(EditDefaultsOnly, Category = "AI")
+	// FName keyTarget;
+
 // ------------------------------------------------------------------------------------------------
 
 private:
 	UBehaviorTreeComponent* behaviorTree;
 	UBlackboardComponent* blackboard;
-
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	FName keyPositionToGo;
-
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	FName keyTarget;
 
 	TArray<AActor*> myAITargetPointArr;
 
